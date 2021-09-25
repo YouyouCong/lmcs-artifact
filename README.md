@@ -7,7 +7,8 @@ The code is checked using Agda version 2.6.0.1.
 - `lambdaf.agda`: The λF calculus presented in Sections 3 and 5.
 The function `go` serves as the proof of termination (Theorem 5).
 The expression `exp4` represents example (2) from Section 2.
-The expression `shift` represents the encoding of the `shift` operator.
+The expression `exp5` represents the non-terminating example of 
+Kameyama and Yonezawa.
 
 - `lambdaf-red.agda`: The reduction rules of λF.
 The relation `Reduce` serves as the proof of preservation (Theorem 1).
