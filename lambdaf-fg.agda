@@ -377,8 +377,8 @@ shift p f =
                   PPrompt (PApp (Val (Var k)) (Val (Var x))))))))
 
 -- Shan's example
-exp6 : {var : Ty → Set} → PExp[ var ] Nat
-exp6 =
+exp5 : {var : Ty → Set} → PExp[ var ] Nat
+exp5 =
   PPrompt
     (PPrompt
       (PPlus
@@ -396,5 +396,5 @@ exp6 =
                                                             (Exp (PApp (Val (Var f))
                                                                        (Val (Num 5)))))))))))))))
 
-test6 : go exp6 ≡ 8
-test6 = refl
+test5 : go exp5 ≡ 8
+test5 = refl

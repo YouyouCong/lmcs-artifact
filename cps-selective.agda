@@ -167,8 +167,8 @@ cpsp (PB2S e) = B2S (cpsp e)
 
 cpsp (PPrompt e) = cpsp e
 
-cpsp (IPrompt is-id e) =
-  App (App (Val (cpsi e)) (kid is-id)) (Val Emp)
+cpsp (IPrompt id e) =
+  App (App (Val (cpsi e)) (kid id)) (Val Emp)
         
 cpsi (Exp e) =
   Abs (λ k → Val (Abs (λ t →
@@ -228,16 +228,16 @@ cpsi (IB2S e) =
                       (Val (Var t')))))))))
         (Val (Var t)))))
 
-cpsi (PControl is-id f) =
+cpsi (PControl id f) =
   Abs (λ k → Val (Abs (λ t →
-    App (Val (Abs (λ x → App (App (Val (cpsi (f x))) (kid is-id))
+    App (Val (Abs (λ x → App (App (Val (cpsi (f x))) (kid id))
                              (Val Emp))))
         (Val (Abs (λ v → 
           App (App (Val (Var k)) (Val (Var v))) (Val (Var t))))))))
                         
-cpsi (IControl is-id c₁ c₂ f) =
+cpsi (IControl id c₁ c₂ f) =
   Abs (λ k → Val (Abs (λ t →
-    App (Val (Abs (λ x → App (App (Val (cpsi (f x))) (kid is-id))
+    App (Val (Abs (λ x → App (App (Val (cpsi (f x))) (kid id))
                              (Val Emp))))
         (Val (Abs (λ v → Val (Abs (λ k' → Val (Abs (λ t' →
           App (App (Val (Var k)) (Val (Var v)))

@@ -196,9 +196,9 @@ cpse (B2S e) =
                       (Val (Var t')))))))))
         (Val (Var t)))))
 
-cpse (Control is-id c₁ c₂ f) =
+cpse (Control id c₁ c₂ f) =
   Abs (λ k → Val (Abs (λ t →
-    App (Val (Abs (λ x → App (App (Val (cpse (f x))) (kid is-id))
+    App (Val (Abs (λ x → App (App (Val (cpse (f x))) (kid id))
                              (Val Emp))))
         (Val (Abs (λ v → Val (Abs (λ k' → Val (Abs (λ t' →
           App (App (Val (Var k)) (Val (Var v)))
@@ -206,10 +206,10 @@ cpse (Control is-id c₁ c₂ f) =
                    (App (App (cons c₁) (Val (Var k')))
                         (Val (Var t'))))))))))))))
 
-cpse (Prompt is-id e) =
+cpse (Prompt id e) =
   Abs (λ k → Val (Abs (λ t →
     App (App (Val (Var k))
-             (App (App (Val (cpse e)) (kid is-id))
+             (App (App (Val (cpse e)) (kid id))
                   (Val Emp)))
         (Val (Var t)))))
 

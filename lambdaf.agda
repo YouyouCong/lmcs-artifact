@@ -242,7 +242,7 @@ exp3 =
 test3 : go exp3 ≡ 6
 test3 = refl
 
--- Motivating example from Section 2
+-- Example (2) from Section 2
 -- ⟨ (Fk₁. is0 (k₁ 5)) + (Fk₂. b2s (k₂ 8)) ⟩
 exp4 : {var : Ty → Set} {α : Ty} {μα : Tr} →
        Exp[ var ] Str ⟨ μα ⟩ α ⟨ μα ⟩ α
@@ -339,20 +339,68 @@ h. By (Prompt), final trail type of body of prompt must satisfy id-cont-type.
 i. By d, g, and h, compatible μβ μ₀ μα does not hold for Fk₂. e₂.
 -}
 
-{-
 -- Encoding of shift
-shift : {var : Ty → Set} {τ α α' β γ : Ty} {μ μα : Tr} →
-        Exp[ var ] ((τ ⇒ α ⟨ μ ⟩ α' ⟨ μ ⟩ α') ⇒ γ ⟨ ● ⟩ γ ⟨ ● ⟩ β) ⟨ ● ⟩ β ⟨ ● ⟩ β →
+shift : {var : Ty → Set} {τ α β γ γ' : Ty} {μ₀ μᵢ μα : Tr} →
+        id-cont-type γ μᵢ γ' →
+        compatible (α ⇒⟨ ● ⟩ α) ● μ₀ →
+        compatible μα μ₀ μα →
+        Exp[ var ] ((τ ⇒ α ⟨ ● ⟩ α ⟨ ● ⟩ α) ⇒ γ ⟨ μᵢ ⟩ γ' ⟨ ● ⟩ β) ⟨ ● ⟩ β ⟨ ● ⟩ β →
         Exp[ var ] τ ⟨ μα ⟩ α ⟨ μα ⟩ β
-shift {α = α} {μα = μα} f =
-  Control {τ₁ = α} refl refl {!!} -- compatible μα (α ⇒⟨ ● ⟩ α) μα
+shift {α = α} id c₁ c₂ f =
+  Control {τ₁ = α} id c₁ c₂
     (λ k → App f (Val (Abs (λ x → Prompt refl (App (Val (Var k)) (Val (Var x)))))))
+
+{-
+initial trail of body of control = initial trail of f = ● 
+initial trail of body of prompt = initial trail of body of k = ●
+answer type of < k x > = type of k x = α
+final answer type of shift = final answer type of f = β
 -}
 
 {-
-Since shift does not modify trails, 
-we expect that its initial and final trail types are the same.
-By definition,
-the initial and final trail type of control cannot be the same.
-These imply that it is not possible to encode shift using control.
+compatible (α ⇒⟨ ● ⟩ α) ● μ₀ means μ₀ ≡ α ⇒⟨ ● ⟩ α
+Hence we need compatible μα (α ⇒⟨ ● ⟩ α) μα
+which says μα doesn't change when composed with the future context
+This cannot hold (see definition of c below)
+
+c : {α : Ty} {μα : Tr} → compatible μα (α ⇒⟨ ● ⟩ α) μα
+c {μα = ●} = {!!} -- (α ⇒⟨ ● ⟩ α) ≡ ●
+c {μα = τ₁ ⇒⟨ ● ⟩ τ₁'} = refl , refl , {!!} -- (α ⇒⟨ ● ⟩ α) ≡ ●
+c {μα = τ₁ ⇒⟨ τ₂ ⇒⟨ μ₂ ⟩ τ₂' ⟩ τ₁'} = refl , refl , {!!}
+-- α ≡ τ₂ × α ≡ τ₂' × compatible (τ₂ ⇒⟨ μ₂ ⟩ τ₂') μ₂ ●
+-}
+
+{-
+-- As we can never supply the proof of the second compatibility relation,
+-- we can never use shift in programs
+
+-- ⟨ shift k. k 1 ⟩
+exp6 : {var : Ty → Set} {α : Ty} {μα : Tr} →
+       Exp[ var ] Nat ⟨ μα ⟩ α ⟨ μα ⟩ α
+exp6 =
+  Prompt refl
+         (shift refl refl {!!} -- (Nat ⇒⟨ ● ⟩ Nat) ≡ ●
+         (Val (Abs (λ k → App (Val (Var k)) (Val (Num 42))))))
+
+-- Shan's example
+exp7 : {var : Ty → Set} {α : Ty} {μα : Tr} →
+       Exp[ var ] Nat ⟨ μα ⟩ α ⟨ μα ⟩ α
+exp7 =
+  Prompt refl
+    (Prompt refl
+      (Plus
+        (Val (Num 1))
+             (Prompt {β = Nat} refl
+                     (App (Val (Abs (λ x →
+                                 shift refl refl {!!} -- (Nat ⇒⟨ ● ⟩ Nat) ≡ ●
+                                       (Val (Abs (λ h → Val (Var x)))))))
+                          (shift {γ = Nat} refl refl {!!} -- (Nat ⇒⟨ ● ⟩ Nat) ≡ ●
+                            (Val
+                              (Abs (λ f →
+                                     shift refl refl {!!} -- (Nat ⇒⟨ ● ⟩ Nat) ≡ ●
+                                           (Val
+                                             (Abs
+                                               (λ g → Plus (Val (Num 2))
+                                                           (App (Val (Var f))
+                                                                     (Val (Num 5))))))))))))))
 -}
