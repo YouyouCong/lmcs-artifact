@@ -165,9 +165,7 @@ cpsp (PIs0 e) = Is0 (cpsp e)
         
 cpsp (PB2S e) = B2S (cpsp e)
 
-cpsp (PPrompt e) = cpsp e
-
-cpsp (IPrompt id e) =
+cpsp (Prompt id e) =
   App (App (Val (cpsi e)) (kid id)) (Val Emp)
         
 cpsi (Exp e) =

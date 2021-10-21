@@ -74,10 +74,7 @@ data PExp[_]_ var where
             PExp[ var ] Nat
   PIs0    : PExp[ var ] Nat → PExp[ var ] Bool
   PB2S    : PExp[ var ] Bool → PExp[ var ] Str
-  PPrompt : {τ : Ty} →
-            PExp[ var ] τ →
-            PExp[ var ] τ
-  IPrompt : {τ β β' : Ty} {μᵢ : Tr} →
+  Prompt : {τ β β' : Ty} {μᵢ : Tr} →
             id-cont-type β μᵢ β' →
             IExp[ var ] β ⟨ μᵢ ⟩ β' ⟨ ● ⟩ τ →
             PExp[ var ] τ
@@ -184,8 +181,7 @@ cpsp (PApp e₁ e₂) = (cpsp e₁) (cpsp e₂)
 cpsp (PPlus e₁ e₂) = (cpsp e₁) + (cpsp e₂)
 cpsp (PIs0 e) = is0 (cpsp e)
 cpsp (PB2S e) = b2s (cpsp e)
-cpsp (PPrompt e) = cpsp e
-cpsp (IPrompt is-id e) =
+cpsp (Prompt is-id e) =
   (cpsi e (kid is-id) tt)
 
 cpsi (Exp e) k t = k (cpsp e) t
@@ -228,7 +224,7 @@ go e = cpsp e
 -- ⟨ 12 ⟩
 exp0 : {var : Ty → Set} → PExp[ var ] Nat
 exp0 =
-  PPrompt (Val (Num 12))
+  Prompt refl (Exp (Val (Num 12)))
 
 test0 : go exp0 ≡ 12
 test0 = refl
@@ -236,7 +232,7 @@ test0 = refl
 -- ⟨ 12 + Fk. k 2 ⟩
 exp1 : {var : Ty → Set} → PExp[ var ] Nat
 exp1 =
-  IPrompt refl
+  Prompt refl
           (IPlus (Exp (Val (Num 12)))
                  (PControl {τ = Nat}
                            refl
@@ -249,7 +245,7 @@ test1 = refl
 exp2 : {var : Ty → Set} → PExp[ var ] Nat
 exp2 =
   PPlus (Val (Num 1))
-        (IPrompt refl
+        (Prompt refl
                  (IPlus (Exp (Val (Num 2)))
                         (PControl {τ = Nat}
                                   refl
@@ -265,11 +261,11 @@ test2 = refl
 -- ⟨ ⟨ 1 + ⟨ (λ x. Fh. x) (Ff. Fg. 2 + f 5) ⟩ ⟩ ⟩
 exp3 : {var : Ty → Set} → PExp[ var ] Nat
 exp3 =
-  PPrompt
-    (PPrompt
-      (PPlus
+  Prompt refl
+    (Exp (Prompt refl
+      (Exp (PPlus
         (Val (Num 1))
-             (IPrompt (refl , refl , refl)
+             (Prompt (refl , refl , refl)
                       (IApp (Exp (Val (IAbs (λ x →
                                    PControl refl
                                             (λ h → Exp (Val (Var x)))))))
@@ -279,7 +275,7 @@ exp3 =
                                                  (λ g →
                                                     IPlus (Exp (Val (Num 2)))
                                                           (IApp (Exp (Val (Var f)))
-                                                                (Exp (Val (Num 5)))))))))))
+                                                                (Exp (Val (Num 5)))))))))))))
 
 test3 : go exp3 ≡ 6
 test3 = refl
@@ -288,7 +284,7 @@ test3 = refl
 -- ⟨ (Fk₁. is0 (k₁ 5)) + (Fk₂. b2s (k₂ 8)) ⟩
 exp4 : {var : Ty → Set} → PExp[ var ] Str
 exp4 =
-  IPrompt (refl , refl , refl)
+  Prompt (refl , refl , refl)
           (IPlus (IControl refl refl refl
                            (λ k₁ → IIs0 (IApp (Exp (Val (Var k₁))) (Exp (Val (Num 5))))))
                  (PControl refl
@@ -303,7 +299,7 @@ test4 = refl
 -- ⟨ (Fk₁. k₁ 1; k₁ 1); (Fk₂. k₂ 1; k₂ 1) ⟩
 exp5 : {var : Ty → Set} → PExp[ var ] Nat
 exp5 =
-  IPrompt {μᵢ = Nat ⇒⟨ ● ⟩ Nat} -- 1
+  Prompt {μᵢ = Nat ⇒⟨ ● ⟩ Nat} -- 1
           (refl , refl , refl)
           (IApp {μβ = Nat ⇒⟨ ● ⟩ Nat} -- 2
                 (Exp (Val (IAbs (λ a →
@@ -348,7 +344,7 @@ c. By (IApp), final trail type of first kᵢ 1 = initial trail type of second k�
 
 d. By a, c, and compatible (τ₁ ⇒⟨ μ₁ ⟩ τ₂) μ₂ μ₀, 4 = 10 = Nat ⇒⟨ ● ⟩ Nat
 
-e. By (IPrompt), initial trail type of body of prompt = ●.
+e. By (Prompt), initial trail type of body of prompt = ●.
    By (IApp), initial trail type of body of prompt = initial trail type of Fk₁. e₁.
    Therefore, 14 = ●.
 
@@ -357,7 +353,7 @@ f. By compatible μβ μ₀ μα, 13 = Nat ⇒⟨ ● ⟩ Nat.
 g. By (IApp), final trail type of Fk₁. e₁ = initial trail type of Fk₂. e₂.
    Therefore, 8 = Nat ⇒⟨ ● ⟩ Nat.
 
-h. By (IPrompt), final trail type of body of prompt must satisfy id-cont-type.
+h. By (Prompt), final trail type of body of prompt must satisfy id-cont-type.
    By (IApp), final trail type of body of prompt = final trail type of Fk₂. e₂.
    Therefore, 7 = Nat ⇒⟨ ● ⟩ Nat.
 
@@ -374,16 +370,16 @@ shift p f =
   PControl p
     (λ k → IApp (Exp f)
                 (Exp (Val (PAbs (λ x →
-                  PPrompt (PApp (Val (Var k)) (Val (Var x))))))))
+                  Prompt refl (Exp (PApp (Val (Var k)) (Val (Var x)))))))))
 
 -- Shan's example
 exp5 : {var : Ty → Set} → PExp[ var ] Nat
 exp5 =
-  PPrompt
-    (PPrompt
+  Prompt refl (Exp
+    (Prompt refl (Exp
       (PPlus
         (Val (Num 1))
-             (IPrompt {β = Nat} refl
+             (Prompt {β = Nat} refl
                       (IApp (Exp (Val (IAbs (λ x →
                                    shift refl (Val (IAbs (λ h → Exp (Val (Var x)))))))))
                             (shift {γ = Nat} refl
@@ -394,7 +390,7 @@ exp5 =
                                              (IAbs
                                                (λ g → IPlus (Exp (Val (Num 2)))
                                                             (Exp (PApp (Val (Var f))
-                                                                       (Val (Num 5)))))))))))))))
+                                                                       (Val (Num 5)))))))))))))))))
 
 test5 : go exp5 ≡ 8
 test5 = refl

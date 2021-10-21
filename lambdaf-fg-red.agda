@@ -65,20 +65,13 @@ data SubstPExp {var} where
           SubstVal v₁ v v₁' →
           SubstPExp (λ y → Val (v₁ y)) v (Val v₁')
 
-  sPPro : {τ β : Ty}
-          {e : var τ → PExp[ var ] β}
-          {v : Val[ var ] τ}
-          {e' : PExp[ var ] β} →
-          SubstPExp e v e' →
-          SubstPExp (λ y → PPrompt (e y)) v (PPrompt e')
-
-  sIPro : {τ β β' γ : Ty} {μᵢ μα : Tr}
+  sPro  : {τ β β' γ : Ty} {μᵢ μα : Tr}
           {e : var τ → IExp[ var ] β ⟨ μᵢ ⟩ β' ⟨ ● ⟩ γ}
           {v : Val[ var ] τ}
           {e' : IExp[ var ] β ⟨ μᵢ ⟩ β' ⟨ ● ⟩ γ}
           {x : id-cont-type β μᵢ β'} →
           SubstIExp e v e' →
-          SubstPExp (λ y → IPrompt x (e y)) v (IPrompt x e')
+          SubstPExp (λ y → Prompt x (e y)) v (Prompt x e')
 
   sPApp : {τ τ₁ τ₂ : Ty}
           {e₁ : var τ → PExp[ var ] (τ₁ ⇒p τ₂)}
@@ -470,13 +463,9 @@ data PReduce {var : Ty → Set} :
   RB2S      : {b : 𝔹} →
               PReduce (PB2S (Val (Bol b))) (Val (Str (b2s b)))
 
-  RPPrompt  : {τ : Ty} →
+  RPrompt  : {τ : Ty} →
               {v₁ : Val[ var ] τ} →
-              PReduce (PPrompt (Val v₁)) (Val v₁)
-
-  RIPrompt  : {τ : Ty} →
-              {v₁ : Val[ var ] τ} →
-              PReduce (IPrompt refl (Exp (Val v₁))) (Val v₁)
+              PReduce (Prompt refl (Exp (Val v₁))) (Val v₁)
 
   RPControl : {τ α β γ γ' : Ty}
               {μᵢ : Tr} →
@@ -484,8 +473,8 @@ data PReduce {var : Ty → Set} :
               (x₁ : id-cont-type γ μᵢ γ') →
               (e : var (τ ⇒p α) →
                    IExp[ var ] γ ⟨ μᵢ ⟩ γ' ⟨ ● ⟩ β) →
-              PReduce (IPrompt refl (pPCxt-plugI p (PControl x₁ e)))
-                      (IPrompt x₁ (IApp (Exp (Val (IAbs e)))
+              PReduce (Prompt refl (pPCxt-plugI p (PControl x₁ e)))
+                      (Prompt x₁ (IApp (Exp (Val (IAbs e)))
                         (Exp (Val (PAbs (λ x → pPCxt-plug p (Val (Var x))))))))
 
   RIControl : {τ α α' β β' γ γ' t₁ t₂ τ₁ τ₂ : Ty}
@@ -501,8 +490,8 @@ data PReduce {var : Ty → Set} :
               same-pICxt p₁ p₂ →
               (e : var (τ ⇒i t₁ ⟨ μ₁ ⟩ t₂ ⟨ μ₂ ⟩ α) →
                    IExp[ var ] γ ⟨ μᵢ ⟩ γ' ⟨ ● ⟩ β) →
-              PReduce (IPrompt x₀ (pICxt-plug p₁ (IControl x₁ x₂ x₃ e)))
-                      (IPrompt x₁ (IApp (Exp (Val (IAbs e)))
+              PReduce (Prompt x₀ (pICxt-plug p₁ (IControl x₁ x₂ x₃ e)))
+                      (Prompt x₁ (IApp (Exp (Val (IAbs e)))
                         (Exp (Val (IAbs (λ x → pICxt-plug p₂ (Exp (Val (Var x)))))))))
                         
   RFr      : {τ₁ τ₂ : Ty}
