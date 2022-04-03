@@ -358,23 +358,26 @@ final answer type of shift = final answer type of f = β
 -}
 
 {-
-compatible (α ⇒⟨ ● ⟩ α) ● μ₀ means μ₀ ≡ α ⇒⟨ ● ⟩ α
-Hence we need compatible μα (α ⇒⟨ ● ⟩ α) μα
-which says μα doesn't change when composed with the future context
-This cannot hold (see definition of c below)
+compatible (α ⇒⟨ ● ⟩ α) ● μ₀ means μ₀ ≡ α ⇒⟨ ● ⟩ α.
+Hence we need compatible μα (α ⇒⟨ ● ⟩ α) μα,
+which says μα does not change when composed with the future context.
+This cannot hold as shown by c below.
+-}
 
-c : {α : Ty} {μα : Tr} → compatible μα (α ⇒⟨ ● ⟩ α) μα
-c {μα = ●} = {!!} -- (α ⇒⟨ ● ⟩ α) ≡ ●
-c {μα = τ₁ ⇒⟨ ● ⟩ τ₁'} = refl , refl , {!!} -- (α ⇒⟨ ● ⟩ α) ≡ ●
-c {μα = τ₁ ⇒⟨ τ₂ ⇒⟨ μ₂ ⟩ τ₂' ⟩ τ₁'} = refl , refl , {!!}
--- α ≡ τ₂ × α ≡ τ₂' × compatible (τ₂ ⇒⟨ μ₂ ⟩ τ₂') μ₂ ●
+c : {α : Ty} {μα : Tr} → compatible μα (α ⇒⟨ ● ⟩ α) μα → ⊥
+c {μα = ●} ()
+c {μα = τ₁ ⇒⟨ ● ⟩ τ₁'} ()
+c {μα = τ₁ ⇒⟨ τ₂ ⇒⟨ ● ⟩ .τ₂ ⟩ τ₁'} (refl , refl , refl , refl , ())
+c {μα = τ₁ ⇒⟨ τ₂ ⇒⟨ τ₃ ⇒⟨ μ₂ ⟩ τ₃' ⟩ .τ₂ ⟩ τ₁'}
+  (refl , refl , refl , refl , ())
+
+{-
+As we can never supply the proof of the second compatibility relation,
+we can never use shift in programs.
 -}
 
 {-
--- As we can never supply the proof of the second compatibility relation,
--- we can never use shift in programs
-
--- ⟨ shift k. k 1 ⟩
+-- ⟨ shift k. k 42 ⟩
 exp6 : {var : Ty → Set} {α : Ty} {μα : Tr} →
        Exp[ var ] Nat ⟨ μα ⟩ α ⟨ μα ⟩ α
 exp6 =
@@ -383,6 +386,7 @@ exp6 =
          (Val (Abs (λ k → App (Val (Var k)) (Val (Num 42))))))
 
 -- Shan's example
+-- ⟨ ⟨ 1 + ⟨ (λ x. Sh. x) (Sf. Sg. 2 + f 5) ⟩ ⟩ ⟩
 exp7 : {var : Ty → Set} {α : Ty} {μα : Tr} →
        Exp[ var ] Nat ⟨ μα ⟩ α ⟨ μα ⟩ α
 exp7 =
