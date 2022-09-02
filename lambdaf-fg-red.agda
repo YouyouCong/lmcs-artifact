@@ -442,7 +442,7 @@ data same-pICxt {var : Ty → Set} :
        same-pICxt (Fr f₁ c₁) (Fr f₂ c₂)
 
 
--- One-step reduction (proof of Theorem 6)
+-- One-step reduction (proof of Theorem 5)
 data PReduce {var : Ty → Set} :
              {τ₁ : Ty} →
              PExp[ var ] τ₁ → PExp[ var ] τ₁ → Set where

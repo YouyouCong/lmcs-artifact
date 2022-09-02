@@ -137,7 +137,7 @@ cons {var} {τ₁} {τ₁'} {μ₁} {μ₂} {μ₃} c =
 -- on every three recursive calls.
 
 -- CPS translation of values and expressions
--- (proof of Theorem 7)
+-- (proof of Theorem 6)
 cpsv : {var : CTy → Set} {τ : Ty} →
        Val[ var ∘ 〚_〛τ  ] τ → CVal[ var ] 〚 τ 〛τ
 

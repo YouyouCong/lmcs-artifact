@@ -215,7 +215,7 @@ cpsi (IControl is-id c₁ c₂ f) k t =
        (kid is-id)
        tt
 
--- Top-level evaluation (proof of Theorem 8)
+-- Top-level evaluation (partial proof of Conjecture 2)
 go : {τ : Ty} → PExp[ 〚_〛τ ] τ → 〚 τ 〛τ
 go e = cpsp e
 

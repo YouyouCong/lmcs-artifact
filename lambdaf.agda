@@ -173,7 +173,7 @@ cpse (Control is-id c₁ c₂ f) k t =
 cpse (Prompt is-id e) k t =
   k (cpse e (kid is-id) tt) t
 
--- Top-level evaluation (proof of Theorem 5)
+-- Top-level evaluation (partial proof of Conjecture 1)
 go : {τ : Ty} → Exp[ 〚_〛τ ] τ ⟨ ● ⟩ τ ⟨ ● ⟩ τ → 〚 τ 〛τ
 go e = cpse e (λ z _ → z) tt
 
